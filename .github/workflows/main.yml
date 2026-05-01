@@ -103,20 +103,15 @@ jobs:
           # Clean up any existing extern declarations that might conflict
           sed -i 's/extern.*uuid_fp.*//g' drivers/misc/mediatek/video/common/win_minmax.c
           
-          # Force the probe logic to skip the actual check
-          sed -i 's/if (uuid_fp())/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c
-          sed -i 's/if (uuid_fp)/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c
-          sed -i 's/CONFIG_SERIAL_8250_CONSOLE=y/# CONFIG_SERIAL_8250_CONSOLE is not set/' arch/arm64/configs/blossom_defconfig
+          # Kill the extern declarations so the linker stops looking for them
+          find drivers/misc/mediatek -name "*.h" -exec sed -i 's/extern.*uuid_fp/ \/\/ /g' {} +
           
-          # Comment out all extern declarations in the include headers
-          find drivers/misc/mediatek -name "*.h" -exec sed -i 's/extern.*uuid_fp/ \/\/ extern uuid_fp/g' {} +
-          
-          # Force every instance in win_minmax.c to be a literal 0
+          # Hardcode the result to 0 in the source code
           sed -i 's/uuid_fp()/0/g' drivers/misc/mediatek/video/common/win_minmax.c
-          sed -i 's/uuid_fp/0/g' drivers/misc/mediatek/video/common/win_minmax.c
+          sed -i 's/if (uuid_fp)/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c
           
-          # Handle the probe function specifically.
-          sed -i 's/if (0())/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c
+          # Clean up the console init error
+          sed -i 's/CONFIG_SERIAL_8250_CONSOLE=y/# CONFIG_SERIAL_8250_CONSOLE is not set/' arch/arm64/configs/blossom_defconfig
 
       - name: Compile Kernel
         run: |
