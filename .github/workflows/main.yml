@@ -34,18 +34,36 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
 
-      - name: Headless & Efficiency Patches
+      - name: broken screen patch
         run: |
           cd kernel
-          # 1. Disable Display Driver (Saves power for scrcpy-only usage)
+          # 1. Disable Display Driver
           sed -i 's/CONFIG_DRM_MEDIATEK=y/# CONFIG_DRM_MEDIATEK is not set/' arch/arm64/configs/blossom_defconfig
           
-          # 2. Undervolt Big Cluster -25mV (1.11V -> 1.09V)
+          # 2. Undervolt Big Clust
           sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1093750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
-          # 3. Increase Sbalance Polling (More battery efficiency)
+          # 3. Increase Sbalance
           sed -i 's/CONFIG_IRQ_SBALANCE_POLL_MSEC=60000/CONFIG_IRQ_SBALANCE_POLL_MSEC=120000/' arch/arm64/configs/blossom_defconfig
 
+# Makes the CPU check for network packets (Hotspot) and scrcpy inputs more frequently.
+sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
+sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
+
+# Force 'Always Connected' DRM State
+find drivers/gpu/drm -name "*.c" -exec sed -i 's/DRM_MODE_CONNECTED/DRM_MODE_CONNECTED/g' {} +
+
+# Schedutil "Instant-Wake" Tweak
+sed -i 's/up_rate_limit_us = <2000>;/up_rate_limit_us = <500>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+sed -i 's/down_rate_limit_us = <1000>;/down_rate_limit_us = <2000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+
+# Low-Latency Workqueues
+echo "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y" >> arch/arm64/configs/blossom_defconfig
+
+#  Disable GFS 
+sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
+
+          
       - name: Compile Kernel
         run: |
           cd kernel
