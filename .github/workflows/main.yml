@@ -46,28 +46,27 @@ jobs:
           # 3. Increase Sbalance
           sed -i 's/CONFIG_IRQ_SBALANCE_POLL_MSEC=60000/CONFIG_IRQ_SBALANCE_POLL_MSEC=120000/' arch/arm64/configs/blossom_defconfig
 
-# Makes the CPU check for network packets (Hotspot) and scrcpy inputs more frequently.
-sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
-sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
+          # Makes the CPU check for network packets (Hotspot) and scrcpy inputs more frequently.
+          sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
 
-# Force 'Always Connected' DRM State
-find drivers/gpu/drm -name "*.c" -exec sed -i 's/DRM_MODE_CONNECTED/DRM_MODE_CONNECTED/g' {} +
+          # Force 'Always Connected' DRM State
+          find drivers/gpu/drm -name "*.c" -exec sed -i 's/DRM_MODE_CONNECTED/DRM_MODE_CONNECTED/g' {} +
 
-# Schedutil "Instant-Wake" Tweak
-sed -i 's/up_rate_limit_us = <2000>;/up_rate_limit_us = <500>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-sed -i 's/down_rate_limit_us = <1000>;/down_rate_limit_us = <2000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+          # Schedutil "Instant-Wake" Tweak
+          sed -i 's/up_rate_limit_us = <2000>;/up_rate_limit_us = <500>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+          sed -i 's/down_rate_limit_us = <1000>;/down_rate_limit_us = <2000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
 
-# Low-Latency Workqueues
-echo "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y" >> arch/arm64/configs/blossom_defconfig
+          # Low-Latency Workqueues
+          echo "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y" >> arch/arm64/configs/blossom_defconfig
 
-#  Disable GFS 
-sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
-
- 
-# Try to change big freq behavior 
-sed -i 's/state = <1>;/state = <0>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-sed -i 's/big-rise-time = <1000>;/big-rise-time = <5000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-sed -i 's/big-down-time = <750>;/big-down-time = <100>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+          #  Disable GFS 
+          sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
+         
+          # Try to change big freq behavior 
+          sed -i 's/state = <1>;/state = <0>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+          sed -i 's/big-rise-time = <1000>;/big-rise-time = <5000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
+          sed -i 's/big-down-time = <750>;/big-down-time = <100>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
 
           
       - name: Compile Kernel
