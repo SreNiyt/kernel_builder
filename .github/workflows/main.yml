@@ -33,7 +33,7 @@ jobs:
       - name: Clone Kernel Source
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
-          
+
       - name: broken screen patch
         run: |
           cd kernel
@@ -68,12 +68,14 @@ jobs:
           sed -i 's/CONFIG_MICROTRUST_TEE_SUPPORT=y/CONFIG_MICROTRUST_TEE_SUPPORT=n/' arch/arm64/configs/blossom_defconfig
           sed -i 's/CONFIG_TRUSTONIC_TEE_SUPPORT=y/CONFIG_TRUSTONIC_TEE_SUPPORT=n/' arch/arm64/configs/blossom_defconfig
 
-          # Link dummy uuid_fp object and fix serial console conflict
+          # Link dummy uuid_fp and use wildcards to find the right video driver path
           echo 'int uuid_fp(void) { return 0; }' > kernel/uuid_dummy.c
           echo 'obj-y += uuid_dummy.o' >> kernel/Makefile
-          sed -i 's/extern.*uuid_fp.*//g' drivers/misc/mediatek/video/common/win_minmax.c
-          sed -i 's/if (uuid_fp())/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c
-          sed -i 's/if (uuid_fp)/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c
+          find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/extern.*uuid_fp.*//g' {} +
+          find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/if (uuid_fp())/if (0)/g' {} +
+          find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/if (uuid_fp)/if (0)/g' {} +
+          
+          # Fix Serial/8250 Console conflict
           sed -i 's/CONFIG_SERIAL_8250_CONSOLE=y/# CONFIG_SERIAL_8250_CONSOLE is not set/' arch/arm64/configs/blossom_defconfig
           
           # Add extra governors
