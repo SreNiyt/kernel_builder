@@ -38,40 +38,18 @@ jobs:
         run: |
           cd kernel
           
-          # Smart config function
-          set_config() {
-            if grep -q "$1" arch/arm64/configs/blossom_defconfig; then
-              sed -i "s/.*$1.*/$1=y/" arch/arm64/configs/blossom_defconfig
-            else
-              echo "$1=y" >> arch/arm64/configs/blossom_defconfig
-            fi
-          }
-
-          # 1. CORE PERFORMANCE (300Hz + Preemption)
-          set_config "CONFIG_HZ_300"
-          set_config "CONFIG_PREEMPT"
-          set_config "CONFIG_PREEMPT_COUNT"
+          # 1. Aggressive Undervolt (-35mV)
+          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1083750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
-          # 2. NETWORKING & BBR2
-          set_config "CONFIG_TCP_CONG_BBR2"
-          set_config "CONFIG_DEFAULT_TCP_CONG=\"bbr2\""
-          set_config "CONFIG_NET_SCH_FQ"
-          set_config "CONFIG_HW_RANDOM_MTK"
+          # 2. Performance Response
+          sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_PREEMPT_VOLUNTARY=y/CONFIG_PREEMPT=y/' arch/arm64/configs/blossom_defconfig
 
-          # 3. NATIVE MEDIATEK OPTIMIZATIONS
-          # Enables specific MTK hardware acceleration for internal data tasks
-          set_config "CONFIG_MTK_COMBO_CHIP"
-          set_config "CONFIG_MTK_PLAT_ION"
-          set_config "CONFIG_MTK_SCHED_TRACER"
+          # 3. Networking 
+          echo "CONFIG_TCP_CONG_BBR2=y" >> arch/arm64/configs/blossom_defconfig
+          echo "CONFIG_DEFAULT_TCP_CONG=\"bbr2\"" >> arch/arm64/configs/blossom_defconfig
 
-          # 4. MEMORY MANAGEMENT (Essential for 2GB/3GB RAM)
-          # Helps merge duplicate memory pages to free up space
-          set_config "CONFIG_KSM"
-          set_config "CONFIG_KSM_LEGACY"
-          
-          # 5. SOURCE FIXES (Undervolt + Compilation)
-          # Stable Undervolt
-          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1093750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
           
       - name: Compile Kernel
