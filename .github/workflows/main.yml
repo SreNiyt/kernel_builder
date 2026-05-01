@@ -29,11 +29,11 @@ jobs:
           ln -sf "/usr/bin/python3" /usr/bin/python
           git config --global user.name "zclkkk"
           git config --global user.email "zclkkk@example.com"
-
+          
       - name: Clone Kernel Source
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
-
+          
       - name: broken screen patch
         run: |
           cd kernel
