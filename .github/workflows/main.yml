@@ -39,27 +39,25 @@ jobs:
           cd kernel
           
           # undervolt to -35mV
-          find . -type f \( -name "*.dts*" -o -name "*.c" -o -name "*.h" \) -exec sed -i 's/1118750/1083750/g' {} +
+          sed -i 's/1118750/1083750/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
           # boost ram speed
-          find . -type f -name "*.dts*" -exec sed -i 's/peak-bw = <4000000>/peak-bw = <5500000>/g' {} +
+          sed -i 's/peak-bw = <4000000>/peak-bw = <5500000>/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
           # gpu oc to 680mhz
-          find . -type f -name "*.dts*" -exec sed -i 's/opp-hz = <650000000>/opp-hz = <680000000>/g' {} +
+          sed -i 's/opp-hz = <650000000>/opp-hz = <680000000>/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
           # tweak dirty ratio
-          find include/linux/ -name "writeback.h" -exec sed -i 's/define DEFAULT_DIRTY_RATIO.*/define DEFAULT_DIRTY_RATIO 10/g' {} +
+          sed -i 's/define DEFAULT_DIRTY_RATIO.*/define DEFAULT_DIRTY_RATIO 10/g' include/linux/writeback.h
 
-          # properly inject HZ and Scheduler tweaks into the generated config
-          # this prevents the timeconst.h error
+          # properly inject HZ and Scheduler tweaks
+          # we run the defconfig first, then modify it before compilation
           make ARCH=arm64 blossom_defconfig
           scripts/config --file .config -e CONFIG_HZ_300
           scripts/config --file .config -d CONFIG_HZ_100
           scripts/config --file .config --set-val CONFIG_HZ 300
           scripts/config --file .config -d CONFIG_SCHED_AUTOGROUP
           scripts/config --file .config -d CONFIG_GENTLE_FAIR_SLEEPERS
-
-
           
       - name: Compile Kernel
         run: |
