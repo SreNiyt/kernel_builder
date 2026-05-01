@@ -38,49 +38,46 @@ jobs:
         run: |
           cd kernel
           
-          # Undervolt and add 2.3GHz OC step
-          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1093750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
-          sed -i '/opp-2106000 {/,/};/ s/};/};\n\t\topp-2301000 {\n\t\t\topp-hz = \/bits\/ 64 <2301000000>;\n\t\t\topp-microvolt = <1125000>;\n\t\t};/' arch/arm64/boot/dts/mediatek/mt6765.dts
-          sed -i 's/clock-frequency = <2106000000>;/clock-frequency = <2301000000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          # Safe config updater
+          set_config() {
+            if grep -q "$1" arch/arm64/configs/blossom_defconfig; then
+              sed -i "s/.*$1.*/$1=y/" arch/arm64/configs/blossom_defconfig
+            else
+              echo "$1=y" >> arch/arm64/configs/blossom_defconfig
+            fi
+          }
+
+          # Enable performance and networking features
+          set_config "CONFIG_HZ_300"
+          set_config "CONFIG_PREEMPT"
+          set_config "CONFIG_HW_RANDOM_MTK"
+          set_config "CONFIG_TCP_CONG_BBR2"
+          set_config "CONFIG_NET_SCH_FQ"
           
-          # Set 300Hz tick rate and disable Gentle Fair Sleepers
-          sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
-          echo "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y" >> arch/arm64/configs/blossom_defconfig
-
-          # Disable DVFSP and tune freq scaling times
+          # Enable H.265/HEVC and VPU optimizations
+          set_config "CONFIG_VIDEO_MEDIATEK_VCODEC"
+          set_config "CONFIG_VIDEO_MEDIATEK_VCU"
+          set_config "CONFIG_MTK_VCODEC_VPU"
+          
+          # Undervolt Big Cluster
+          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1093750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          
+          # Disable DVFSP and Gentle Fair Sleepers
           sed -i 's/state = <1>;/state = <0>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-          sed -i 's/big-rise-time = <1000>;/big-rise-time = <6000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-          sed -i 's/big-down-time = <750>;/big-down-time = <100>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-          sed -i 's/up_rate_limit_us = <2000>;/up_rate_limit_us = <500>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-          sed -i 's/down_rate_limit_us = <1000>;/down_rate_limit_us = <2000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
-
-          # Enable BBR2, MTK HW Random, and Full Preemption
-          echo "CONFIG_HW_RANDOM_MTK=y" >> arch/arm64/configs/blossom_defconfig
-          echo "CONFIG_TCP_CONG_BBR2=y" >> arch/arm64/configs/blossom_defconfig
-          echo "CONFIG_DEFAULT_TCP_CONG=\"bbr2\"" >> arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_PREEMPT_VOLUNTARY=y/CONFIG_PREEMPT=y/' arch/arm64/configs/blossom_defconfig
-          echo "CONFIG_PREEMPT_COUNT=y" >> arch/arm64/configs/blossom_defconfig
-
-          # Disable TEE, GZ, and Trustonic security
+          sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
+          
+          # Disable security and serial console
           sed -i 's/CONFIG_MTK_GZ=y/CONFIG_MTK_GZ=n/' arch/arm64/configs/blossom_defconfig
           sed -i 's/CONFIG_MICROTRUST_TEE_SUPPORT=y/CONFIG_MICROTRUST_TEE_SUPPORT=n/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_TRUSTONIC_TEE_SUPPORT=y/CONFIG_TRUSTONIC_TEE_SUPPORT=n/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_SERIAL_8250_CONSOLE=y/# CONFIG_SERIAL_8250_CONSOLE is not set/' arch/arm64/configs/blossom_defconfig
 
-          # Link dummy uuid_fp and use wildcards to find the right video driver path
-          echo 'int uuid_fp(void) { return 0; }' > kernel/uuid_dummy.c
-          echo 'obj-y += uuid_dummy.o' >> kernel/Makefile
+          # Link dummy uuid_fp and fix video driver build
+          [ ! -f kernel/uuid_dummy.c ] && echo 'int uuid_fp(void) { return 0; }' > kernel/uuid_dummy.c
+          grep -q "uuid_dummy.o" kernel/Makefile || echo 'obj-y += uuid_dummy.o' >> kernel/Makefile
           find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/extern.*uuid_fp.*//g' {} +
           find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/if (uuid_fp())/if (0)/g' {} +
           find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/if (uuid_fp)/if (0)/g' {} +
-          
-          # Fix Serial/8250 Console conflict
-          sed -i 's/CONFIG_SERIAL_8250_CONSOLE=y/# CONFIG_SERIAL_8250_CONSOLE is not set/' arch/arm64/configs/blossom_defconfig
-          
-          # Add extra governors
-          echo "CONFIG_CPU_FREQ_GOV_POWERSAVE=y" >> arch/arm64/configs/blossom_defconfig
-          echo "CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y" >> arch/arm64/configs/blossom_defconfig
+
 
 
       - name: Compile Kernel
