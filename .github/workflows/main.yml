@@ -34,17 +34,23 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
 
-      - name: broken screen patch
+       - name: try to oc G25
         run: |
           cd kernel
           
-          # 1. Aggressive Undervolt (-35mV)
-          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1083750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          # changeing the step
+          sed -i 's/opp-hz = <0 2106000000>;/opp-hz = <0 2301000000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          sed -i 's/opp-hz = <0 2002000000>;/opp-hz = <0 2215000000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          sed -i 's/opp-hz = <0 1898000000>;/opp-hz = <0 2139000000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
-          # 2. Performance Response
-          sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_PREEMPT_VOLUNTARY=y/CONFIG_PREEMPT=y/' arch/arm64/configs/blossom_defconfig
+          # change the voltage 
+          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1106250>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          
+          # ensure ram can keep up
+          sed -i 's/peak-bw = <4000000>;/peak-bw = <5500000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+
+         # disable gentle sleepers
+          sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
           
           
       - name: Compile Kernel
