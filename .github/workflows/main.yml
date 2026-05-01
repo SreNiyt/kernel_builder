@@ -34,6 +34,7 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
 
+          
       - name: try to oc G25
         run: |
           cd kernel
