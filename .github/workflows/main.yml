@@ -68,8 +68,6 @@ jobs:
           sed -i 's/big-rise-time = <1000>;/big-rise-time = <5000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
           sed -i 's/big-down-time = <750>;/big-down-time = <100>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
 
-          
-
           # rmoving screen stuff bc mine is broken
           sed -i 's/CONFIG_DRM_MEDIATEK=y/CONFIG_DRM_MEDIATEK=n/' arch/arm64/configs/blossom_defconfig
           sed -i 's/CONFIG_FB_MTK=y/CONFIG_FB_MTK=n/' arch/arm64/configs/blossom_defconfig
