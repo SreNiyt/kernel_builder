@@ -44,14 +44,21 @@ jobs:
           # boost ram speed
           find . -type f -name "*.dts*" -exec sed -i 's/peak-bw = <4000000>/peak-bw = <5500000>/g' {} +
           
-          # disable gentle sleepers
-          sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/g' kernel/sched/features.h
-
-          # set hz to 300
-          find include/asm-generic/ -name "param.h" -exec sed -i 's/define HZ.*/define HZ 300/g' {} +
-
+          # gpu oc to 680mhz
+          find . -type f -name "*.dts*" -exec sed -i 's/opp-hz = <650000000>/opp-hz = <680000000>/g' {} +
+          
           # tweak dirty ratio
           find include/linux/ -name "writeback.h" -exec sed -i 's/define DEFAULT_DIRTY_RATIO.*/define DEFAULT_DIRTY_RATIO 10/g' {} +
+
+          # properly inject HZ and Scheduler tweaks into the generated config
+          # this prevents the timeconst.h error
+          make ARCH=arm64 blossom_defconfig
+          scripts/config --file .config -e CONFIG_HZ_300
+          scripts/config --file .config -d CONFIG_HZ_100
+          scripts/config --file .config --set-val CONFIG_HZ 300
+          scripts/config --file .config -d CONFIG_SCHED_AUTOGROUP
+          scripts/config --file .config -d CONFIG_GENTLE_FAIR_SLEEPERS
+
 
           
       - name: Compile Kernel
