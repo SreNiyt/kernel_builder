@@ -41,8 +41,8 @@ jobs:
           # Undervolt Big Clust
           sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1093750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
-          # trying to oc G25
-          sed -i '/opp-2106000 {/,/};/ { /};/ a \			opp-2301000 {\n				opp-hz = /bits/ 64 <2301000000>;\n				opp-microvolt = <1125000>;\n			};' arch/arm64/boot/dts/mediatek/mt6765.dts
+          # trying to oc G25 (Clean Syntax)
+          sed -i '/opp-2106000 {/,/};/ s/};/};\n\t\topp-2301000 {\n\t\t\topp-hz = \/bits\/ 64 <2301000000>;\n\t\t\topp-microvolt = <1125000>;\n\t\t};/' arch/arm64/boot/dts/mediatek/mt6765.dts
 
           # tell the thing is 2.3Ghz
           sed -i 's/clock-frequency = <2106000000>;/clock-frequency = <2301000000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
