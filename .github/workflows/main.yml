@@ -73,16 +73,7 @@ jobs:
           # Stable Undervolt
           sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1093750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
-          # Fix the uuid_fp build error
-          echo 'int uuid_fp(void) { return 0; }' > kernel/uuid_dummy.c
-          grep -q "uuid_dummy.o" kernel/Makefile || echo 'obj-y += uuid_dummy.o' >> kernel/Makefile
-          find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/extern.*uuid_fp.*//g' {} +
-          find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/if (uuid_fp())/if (0)/g' {} +
-          find drivers/misc/mediatek/video -name "win_minmax.c" -exec sed -i 's/if (uuid_fp)/if (0)/g' {} +
           
-          # Remove serial console to avoid boot conflicts
-          sed -i 's/CONFIG_SERIAL_8250_CONSOLE=y/# CONFIG_SERIAL_8250_CONSOLE is not set/' arch/arm64/configs/blossom_defconfig
-
       - name: Compile Kernel
         run: |
           cd kernel
