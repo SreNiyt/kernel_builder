@@ -45,11 +45,6 @@ jobs:
           sed -i 's/CONFIG_HZ_100=y/CONFIG_HZ_300=y/' arch/arm64/configs/blossom_defconfig
           sed -i 's/CONFIG_HZ=100/CONFIG_HZ=300/' arch/arm64/configs/blossom_defconfig
           sed -i 's/CONFIG_PREEMPT_VOLUNTARY=y/CONFIG_PREEMPT=y/' arch/arm64/configs/blossom_defconfig
-
-          # 3. Networking 
-          echo "CONFIG_TCP_CONG_BBR2=y" >> arch/arm64/configs/blossom_defconfig
-          echo "CONFIG_DEFAULT_TCP_CONG=\"bbr2\"" >> arch/arm64/configs/blossom_defconfig
-
           
           
       - name: Compile Kernel
