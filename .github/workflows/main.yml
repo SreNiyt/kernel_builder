@@ -69,6 +69,29 @@ jobs:
           sed -i 's/big-down-time = <750>;/big-down-time = <100>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
 
           
+
+          # rmoving screen stuff bc mine is broken
+          sed -i 's/CONFIG_DRM_MEDIATEK=y/CONFIG_DRM_MEDIATEK=n/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_FB_MTK=y/CONFIG_FB_MTK=n/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_LEDS_MT6357_BACKLIGHT=y/CONFIG_LEDS_MT6357_BACKLIGHT=n/' arch/arm64/configs/blossom_defconfig
+          
+          #TEE stuff
+          sed -i 's/CONFIG_MTK_GZ=y/CONFIG_MTK_GZ=n/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_MICROTRUST_TEE_SUPPORT=y/CONFIG_MICROTRUST_TEE_SUPPORT=n/' arch/arm64/configs/blossom_defconfig
+          sed -i 's/CONFIG_TRUSTONIC_TEE_SUPPORT=y/CONFIG_TRUSTONIC_TEE_SUPPORT=n/' arch/arm64/configs/blossom_defconfig
+          
+          # audio stuff
+          sed -i 's/CONFIG_PREEMPT_VOLUNTARY=y/CONFIG_PREEMPT=y/' arch/arm64/configs/blossom_defconfig
+          echo "CONFIG_PREEMPT_COUNT=y" >> arch/arm64/configs/blossom_defconfig
+
+          # give my bbr2 back
+          echo "CONFIG_TCP_CONG_BBR2=y" >> arch/arm64/configs/blossom_defconfig
+          echo "CONFIG_DEFAULT_TCP_CONG=\"bbr2\"" >> arch/arm64/configs/blossom_defconfig
+
+          # add back some governor
+          echo "CONFIG_CPU_FREQ_GOV_POWERSAVE=y" >> arch/arm64/configs/blossom_defconfig
+          echo "CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y" >> arch/arm64/configs/blossom_defconfig
+
       - name: Compile Kernel
         run: |
           cd kernel
