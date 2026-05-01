@@ -38,28 +38,11 @@ jobs:
         run: |
           cd kernel
           
-          # clean the source tree to avoid 'not clean' error
-          make mrproper
-          
           # undervolt to -35mV
-          sed -i 's/1118750/1083750/g' arch/arm64/boot/dts/mediatek/mt6765.dts
+          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1083750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
           # boost ram speed
           sed -i 's/peak-bw = <4000000>/peak-bw = <5500000>/g' arch/arm64/boot/dts/mediatek/mt6765.dts
-          
-          # gpu oc to 680mhz
-          sed -i 's/opp-hz = <650000000>/opp-hz = <680000000>/g' arch/arm64/boot/dts/mediatek/mt6765.dts
-          
-          # tweak dirty ratio
-          sed -i 's/define DEFAULT_DIRTY_RATIO.*/define DEFAULT_DIRTY_RATIO 10/g' include/linux/writeback.h
-
-          # setup config and inject HZ/Scheduler tweaks
-          make ARCH=arm64 blossom_defconfig
-          scripts/config --file .config -e CONFIG_HZ_300
-          scripts/config --file .config -d CONFIG_HZ_100
-          scripts/config --file .config --set-val CONFIG_HZ 300
-          scripts/config --file .config -d CONFIG_SCHED_AUTOGROUP
-          scripts/config --file .config -d CONFIG_GENTLE_FAIR_SLEEPERS
 
           
       - name: Compile Kernel
