@@ -68,13 +68,9 @@ jobs:
           sed -i 's/big-rise-time = <1000>;/big-rise-time = <5000>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
           sed -i 's/big-down-time = <750>;/big-down-time = <100>;/' arch/arm64/boot/dts/mediatek/mt6765.dts
 
-          # rmoving screen stuff bc mine is broken
-          sed -i 's/CONFIG_DRM_MEDIATEK=y/CONFIG_DRM_MEDIATEK=n/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_FB_MTK=y/CONFIG_FB_MTK=n/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/CONFIG_LEDS_MT6357_BACKLIGHT=y/CONFIG_LEDS_MT6357_BACKLIGHT=n/' arch/arm64/configs/blossom_defconfig
-          sed -i 's/external.*uuid_fp//g' drivers/misc/mediatek/include/mtk_uuid.h 2>/dev/null || true
-          sed -i 's/.*uuid_fp.*//g' drivers/misc/mediatek/video/common/win_minmax.c 2>/dev/null || true
-          sed -i 's/if (uuid_fp)/if (0)/g' drivers/misc/mediatek/video/common/win_minmax.c 2>/dev/null || true
+          #rndm mtk
+          echo "CONFIG_HW_RANDOM=y" >> arch/arm64/configs/blossom_defconfig
+          echo "CONFIG_HW_RANDOM_MTK=y" >> arch/arm64/configs/blossom_defconfig
 
           #TEE stuff
           sed -i 's/CONFIG_MTK_GZ=y/CONFIG_MTK_GZ=n/' arch/arm64/configs/blossom_defconfig
