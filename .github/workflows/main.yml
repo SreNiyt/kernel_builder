@@ -34,7 +34,6 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
 
-          
       - name: try to oc G25
         run: |
           cd kernel
@@ -50,9 +49,8 @@ jobs:
           # ensure ram can keep up
           sed -i 's/peak-bw = <4000000>;/peak-bw = <5500000>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
 
-         # disable gentle sleepers
+          # disable gentle sleepers
           sed -i 's/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, true)/SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)/' kernel/sched/features.h
-          
           
       - name: Compile Kernel
         run: |
@@ -69,4 +67,3 @@ jobs:
           name: Sashimi-Dandelion-Headless
           path: kernel/*.zip
           retention-days: 5
-
