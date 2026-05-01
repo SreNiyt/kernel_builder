@@ -34,15 +34,6 @@ jobs:
         run: |
           git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
 
-      - name: stable server patch
-        run: |
-          cd kernel
-          
-          # undervolt to -35mV
-          sed -i 's/opp-microvolt = <1118750>;/opp-microvolt = <1083750>;/g' arch/arm64/boot/dts/mediatek/mt6765.dts
-          
-          # boost ram speed
-          sed -i 's/peak-bw = <4000000>/peak-bw = <5500000>/g' arch/arm64/boot/dts/mediatek/mt6765.dts
 
           
       - name: Compile Kernel
