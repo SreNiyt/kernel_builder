@@ -38,6 +38,9 @@ jobs:
         run: |
           cd kernel
           
+          # clean the source tree to avoid 'not clean' error
+          make mrproper
+          
           # undervolt to -35mV
           sed -i 's/1118750/1083750/g' arch/arm64/boot/dts/mediatek/mt6765.dts
           
@@ -50,14 +53,14 @@ jobs:
           # tweak dirty ratio
           sed -i 's/define DEFAULT_DIRTY_RATIO.*/define DEFAULT_DIRTY_RATIO 10/g' include/linux/writeback.h
 
-          # properly inject HZ and Scheduler tweaks
-          # we run the defconfig first, then modify it before compilation
+          # setup config and inject HZ/Scheduler tweaks
           make ARCH=arm64 blossom_defconfig
           scripts/config --file .config -e CONFIG_HZ_300
           scripts/config --file .config -d CONFIG_HZ_100
           scripts/config --file .config --set-val CONFIG_HZ 300
           scripts/config --file .config -d CONFIG_SCHED_AUTOGROUP
           scripts/config --file .config -d CONFIG_GENTLE_FAIR_SLEEPERS
+
           
       - name: Compile Kernel
         run: |
