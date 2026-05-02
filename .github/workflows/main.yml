@@ -32,10 +32,10 @@ jobs:
           
       - name: Clone Kernel Source
         run: |
-          git clone --depth=1 https://github.com/zyexro/sashimi_kernel_xiaomi_blossom -b sashimi kernel
+          git clone --depth=1 https://github.com/SreNiyt/kernel.git tmp
+          mv tmp/kernel-src kernel
+          rm -rf tmp
 
-
-          
       - name: Compile Kernel
         run: |
           cd kernel
