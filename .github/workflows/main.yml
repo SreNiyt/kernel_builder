@@ -33,7 +33,7 @@ jobs:
       - name: Clone Kernel Source
         run: |
           git clone --depth=1 https://github.com/SreNiyt/kernel
-          mv kernel/kernel-src/* kernel/
+          mv kernel/kernel-src/* kernel/ > /dev/null 2>&1
 
       - name: Compile Kernel
         run: |
