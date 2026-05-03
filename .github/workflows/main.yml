@@ -37,7 +37,7 @@ jobs:
 
       - name: Compile Kernel
         run: |
-          cd kernel/kernel-src
+          cd kernel
           # We skip the tg_utils calls since you don't use Telegram
           if [ "${{ github.event.inputs.KSU }}" = "ksu" ] || [ "${{ github.event.inputs.KSU }}" = "both" ]; then
             bash ../ksu/applyPatches.sh
