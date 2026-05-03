@@ -32,8 +32,15 @@ jobs:
           
       - name: Clone Kernel Source
         run: |
-          git clone --depth=1 https://github.com/SreNiyt/kernel
+          # --quiet stops git from listing objects
+          git clone --depth=1 --quiet https://github.com/SreNiyt/kernel
+          
+          # Move files silently
+          # The 2>/dev/null hides errors if folders are empty
           mv kernel/kernel-src/* kernel/ > /dev/null 2>&1
+          mv kernel/kernel-src/.* kernel/ > /dev/null 2>&1 || true
+          rmdir kernel/kernel-src
+
 
       - name: Compile Kernel
         run: |
