@@ -19,14 +19,7 @@ case $1 in
 
   "build" )
     export PATH="${dir}/bin:/usr/bin:${PATH}"
-
-    # 1. Load the defconfig ($2 is blossom_defconfig)
     make -j$NJOBS O=out CC=clang LD=ld.lld ARCH=arm64 SUBARCH=arm64 $2
-
-    # 2. Add this: Auto-fill missing configs so it doesn't hang/error out
-    make -j$NJOBS O=out ARCH=arm64 olddefconfig
-
-    # 3. Main build command
     make -j$NJOBS O=out \
       CROSS_COMPILE="aarch64-linux-gnu-" \
       CROSS_COMPILE_ARM32="arm-linux-gnueabi-" \
@@ -45,8 +38,6 @@ case $1 in
       HOSTLD=ld.lld \
       HOSTAR=llvm-ar \
       2>&1 | tee ${CUR_TOOLCHAIN}.log
-
     sh ${outside}/ver_toolchain.sh clang ld.lld > ${CUR_TOOLCHAIN}.info
   ;;
-
 esac
