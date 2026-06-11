@@ -6,7 +6,7 @@ on:
       COMPILER:
         description: 'Compiler to use'
         required: true
-        default: 'AOSP-Clang'
+        default: 'Neutron-Clang'
       KSU:
         description: 'Root: ksu (for KernelSU), both (KSU+SuSFS), or none'
         required: false
