@@ -29,16 +29,23 @@ jobs:
           ln -sf "/usr/bin/python3" /usr/bin/python
           git config --global user.name "zclkkk"
           git config --global user.email "zclkkk@example.com"
-          
-      - name: Clone Kernel Source
+
+      - name: Clone Kernel Source and Patch WireGuard
         run: |
           git clone --depth=1 --quiet https://github.com/SreNiyt/kernel kernel
           
+          # Generate the WireGuard source patch and apply it straight to the kernel tree
+          ./wireguard-linux-compat/kernel-tree-scripts/create-patch.sh | patch -p1 -d kernel
+
+          # Enable WireGuard in the defconfig dynamically
+          # NOTE: Change 'vendor/your_device_defconfig' to your actual defconfig path!
+          echo "CONFIG_WIREGUARD=y" >> kernel/arch/arm64/configs/blossom_defconfig
+          echo "CONFIG_WIREGUARD_DEBUG=n" >> kernel/arch/arm64/configs/blossom_defconfig
 
       - name: Compile Kernel
         run: |
           cd kernel
-          # We skip the tg_utils calls since you don't use Telegram
+          # We skip the tg_utils calls
           if [ "${{ github.event.inputs.KSU }}" = "ksu" ] || [ "${{ github.event.inputs.KSU }}" = "both" ]; then
             bash ../ksu/applyPatches.sh
           fi
@@ -50,3 +57,4 @@ jobs:
           name: Sashimi-Dandelion-Headless
           path: kernel/*.zip
           retention-days: 5
+
