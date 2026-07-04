@@ -11,6 +11,14 @@ on:
         description: 'Root: ksu (for KernelSU), both (KSU+SuSFS), or none'
         required: false
         default: 'ksu'
+      WIREGUARD:
+        description: 'WireGuard?'
+        required: false
+        default: 'yes'
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
 
 jobs:
   build:
@@ -34,13 +42,15 @@ jobs:
         run: |
           git clone --depth=1 --quiet https://github.com/SreNiyt/kernel kernel
           
-          # Generate the WireGuard source patch and apply it straight to the kernel tree
-          ./wireguard-linux-compat/kernel-tree-scripts/create-patch.sh | patch -p1 -d kernel
+          if [ "${{ github.event.inputs.WIREGUARD }}" = "yes" ]; then
+            echo "WireGuard is enabled. Patching kernel tree..."
+            ./wireguard-linux-compat/kernel-tree-scripts/create-patch.sh | patch -p1 -d kernel
 
-          # Enable WireGuard in the defconfig dynamically
-          # NOTE: Change 'vendor/your_device_defconfig' to your actual defconfig path!
-          echo "CONFIG_WIREGUARD=y" >> kernel/arch/arm64/configs/blossom_defconfig
-          echo "CONFIG_WIREGUARD_DEBUG=n" >> kernel/arch/arm64/configs/blossom_defconfig
+           echo "CONFIG_WIREGUARD=y" >> kernel/arch/arm64/configs/blossom_defconfig
+            echo "CONFIG_WIREGUARD_DEBUG=n" >> kernel/arch/arm64/configs/blossom_defconfig
+          else
+            echo "WireGuard is disabled. Skipping patches."
+          fi
 
       - name: Compile Kernel
         run: |
@@ -54,7 +64,6 @@ jobs:
       - name: Upload Flashable Zip
         uses: actions/upload-artifact@v4
         with:
-          name: Sashimi-Dandelion-Headless
+          name: Night
           path: kernel/*.zip
           retention-days: 5
-
