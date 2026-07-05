@@ -79,8 +79,7 @@ jobs:
             git clone --depth=1 https://github.com/SreNiyt/nomount ../nomount_src
             
             echo "Merging NoMount files..."
-            cp -r ../nomount_src/kernel/fs/* fs/
-            cp -r ../nomount_src/kernel/include/linux/* include/linux/
+            cp -r ../nomount_src/kernel/src/* fs/
             
             echo "Applying NoMount kernel patch..."
             patch -p1 < ../nomount_src/kernel/patches/nomount_4.19_kernel_integration.patch
