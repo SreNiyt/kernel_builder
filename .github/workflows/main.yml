@@ -83,7 +83,7 @@ jobs:
             cp -r ../nomount_src/kernel/include/linux/* include/linux/
             
             echo "Applying NoMount kernel patch..."
-            git am ../nomount_src/kernel/patches/nomount_4.19_kernel_integration.patch
+            patch -p1 < ../nomount_src/kernel/patches/nomount_4.19_kernel_integration.patch
             
             echo "CONFIG_NOMOUNT=y" >> arch/arm64/configs/blossom_defconfig
             
