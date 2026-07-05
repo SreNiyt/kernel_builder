@@ -76,7 +76,7 @@ jobs:
             bash ../ksu/applyPatches.sh
             
             echo "Cloning NoMount 4.19 fork..."
-            git clone --depth=1 https://github.com/zyexro/nomount_k4.19 ../nomount_src
+            git clone --depth=1 https://github.com/SreNiyt/nomount ../nomount_src
             
             echo "Merging NoMount files..."
             cp -r ../nomount_src/kernel/fs/* fs/
