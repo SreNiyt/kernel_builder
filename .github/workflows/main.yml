@@ -93,10 +93,19 @@ jobs:
           
           bash ../build.sh "${{ github.event.inputs.COMPILER }}"
 
-      - name: Upload Flashable Zip
+      - name: Find config
+        id: find_config
+        run: |
+          CONFIG=$(find . -name .config | head -n 1)
+          echo "Found config: $CONFIG"
+          echo "config_path=$CONFIG" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Flashable Zip and Config
         uses: actions/upload-artifact@v4
         with:
           name: Night
-          path: kernel/*.zip
+          path: |
+            kernel/*.zip
+            ${{ steps.find_config.outputs.config_path }}
+          include-hidden-files: true
           retention-days: 5
-
