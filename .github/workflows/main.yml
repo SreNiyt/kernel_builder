@@ -25,7 +25,14 @@ on:
         options:
           - 'yes'
           - 'no'
-
+      KERNEL_SOURCE:
+        description: 'Kernel source'
+        required: true
+        default: 'SreNiyt'
+        type: choice
+        options:
+          - 'SreNiyt'
+          - 'zyexro'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,7 +53,14 @@ jobs:
 
       - name: Clone Kernel Source and Patch WireGuard
         run: |
-          git clone --depth=1 --quiet https://github.com/SreNiyt/kernel kernel
+          if [ "${{ github.event.inputs.KERNEL_SOURCE }}" = "SreNiyt" ]; then
+            KERNEL_REPO="https://github.com/SreNiyt/kernel"
+          else
+            KERNEL_REPO="https://github.com/zyexro/sashimi_kernel_xiaomi_blossom"
+          fi
+
+          echo "Using kernel source: $KERNEL_REPO"
+          git clone --depth=1 --quiet "$KERNEL_REPO" kernel
 
           if [ "${{ github.event.inputs.WIREGUARD }}" = "yes" ]; then
             echo "WireGuard is enabled. Patching kernel tree..."
