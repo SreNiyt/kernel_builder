@@ -9,8 +9,8 @@ export outside="${maindir}/.."
 
 export ARCH="arm64"
 export SUBARCH="arm64"
-export KBUILD_BUILD_USER="zyexro"
-export KBUILD_BUILD_HOST="telegram-de"
+export KBUILD_BUILD_USER="SreNiyt"
+export KBUILD_BUILD_HOST="night-de"
 
 export defconfig="blossom_defconfig"
 
