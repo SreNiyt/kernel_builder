@@ -1,5 +1,4 @@
 name: build
-
 on:
   workflow_dispatch:
     inputs:
@@ -8,15 +7,14 @@ on:
         required: true
         default: 'Neutron-Clang'
       ROOT_METHOD:
-        description: 'Root injection method'
+        description: 'what did you want to add?'
         required: true
         default: 'ksu'
         type: choice
         options:
           - 'none'
-          - 'ksu'       # Standard KernelSU (uses applyPatches.sh)
-          - 'susfs'     # KernelSU + SuSFS (uses asus.sh)
-          - 'nomount'   # KernelSU + NoMount 4.19
+          - 'ksu'
+          - 'nomount'
       WIREGUARD:
         description: 'WireGuard?'
         required: false
@@ -31,7 +29,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: fedora:40
-
     steps:
       - name: Checkout Builder
         uses: actions/checkout@v4
@@ -47,11 +44,9 @@ jobs:
       - name: Clone Kernel Source and Patch WireGuard
         run: |
           git clone --depth=1 --quiet https://github.com/SreNiyt/kernel kernel
-
           if [ "${{ github.event.inputs.WIREGUARD }}" = "yes" ]; then
             echo "WireGuard is enabled. Patching kernel tree..."
             ./wireguard-linux-compat/kernel-tree-scripts/create-patch.sh | patch -p1 -d kernel
-
             echo "CONFIG_WIREGUARD=y" >> kernel/arch/arm64/configs/blossom_defconfig
             echo "CONFIG_WIREGUARD_DEBUG=n" >> kernel/arch/arm64/configs/blossom_defconfig
           else
@@ -61,36 +56,22 @@ jobs:
       - name: Apply Root Patches and Compile Kernel
         run: |
           cd kernel
-          
           if [ "${{ github.event.inputs.ROOT_METHOD }}" = "ksu" ]; then
             echo "Applying standard KernelSU..."
             bash ../ksu/applyPatches.sh
-            
-          elif [ "${{ github.event.inputs.ROOT_METHOD }}" = "susfs" ]; then
-            echo "Applying KernelSU + SuSFS..."
-            bash ../ksu/asus.sh
-            
           elif [ "${{ github.event.inputs.ROOT_METHOD }}" = "nomount" ]; then
-            echo "Applying KernelSU + NoMount (4.19)..."
-            
-            bash ../ksu/applyPatches.sh
-            
+            echo "Applying NoMount (4.19) standalone..."
             echo "Cloning NoMount 4.19 fork..."
             git clone --depth=1 https://github.com/SreNiyt/nomount ../nomount_src
-            
             echo "Merging NoMount files..."
             cp -r ../nomount_src/kernel/fs/* fs/
             cp -r ../nomount_src/kernel/include/linux/* include/linux/
-            
             echo "Applying NoMount kernel patch..."
             patch -p1 < ../nomount_src/kernel/patches/nomount_4.19_kernel_integration.patch
-            
             echo "CONFIG_NOMOUNT=y" >> arch/arm64/configs/blossom_defconfig
-            
           else
             echo "No root method selected. Building clean kernel."
           fi
-          
           bash ../build.sh "${{ github.event.inputs.COMPILER }}"
 
       - name: Find config
@@ -109,3 +90,4 @@ jobs:
             ${{ steps.find_config.outputs.config_path }}
           include-hidden-files: true
           retention-days: 5
+
