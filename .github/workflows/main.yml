@@ -15,6 +15,7 @@ on:
           - 'none'
           - 'ksu'
           - 'nomount'
+          - 'ksu+nomount'
       WIREGUARD:
         description: 'WireGuard?'
         required: false
@@ -56,10 +57,14 @@ jobs:
       - name: Apply Root Patches and Compile Kernel
         run: |
           cd kernel
-          if [ "${{ github.event.inputs.ROOT_METHOD }}" = "ksu" ]; then
+          ROOT_OPT="${{ github.event.inputs.ROOT_METHOD }}"
+          
+          if [[ "$ROOT_OPT" == "ksu" || "$ROOT_OPT" == "ksu+nomount" ]]; then
             echo "Applying standard KernelSU..."
             bash ../ksu/applyPatches.sh
-          elif [ "${{ github.event.inputs.ROOT_METHOD }}" = "nomount" ]; then
+          fi
+          
+          if [[ "$ROOT_OPT" == "nomount" || "$ROOT_OPT" == "ksu+nomount" ]]; then
             echo "Applying NoMount (4.19) standalone..."
             echo "Cloning NoMount 4.19 fork..."
             git clone --depth=1 https://github.com/SreNiyt/nomount ../nomount_src
@@ -69,9 +74,12 @@ jobs:
             echo "Applying NoMount kernel patch..."
             patch -p1 < ../nomount_src/kernel/patches/nomount_4.19_kernel_integration.patch
             echo "CONFIG_NOMOUNT=y" >> arch/arm64/configs/blossom_defconfig
-          else
+          fi
+          
+          if [[ "$ROOT_OPT" == "none" ]]; then
             echo "No root method selected. Building clean kernel."
           fi
+          
           bash ../build.sh "${{ github.event.inputs.COMPILER }}"
 
       - name: Find config
