@@ -19,7 +19,7 @@ on:
       WIREGUARD:
         description: 'WireGuard?'
         required: false
-        default: 'yes'
+        default: 'no'
         type: choice
         options:
           - 'yes'
