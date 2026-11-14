@@ -65,17 +65,11 @@ jobs:
           fi
           
           if [[ "$ROOT_OPT" == "nomount" || "$ROOT_OPT" == "ksu+nomount" ]]; then
-            echo "Applying NoMount (4.19) standalone..."
-            echo "Cloning NoMount 4.19 fork..."
-            git clone --depth=1 https://github.com/SreNiyt/nomount ../nomount_src
-            echo "Merging NoMount files..."
-            cp -r ../nomount_src/kernel/fs/* fs/
-            cp -r ../nomount_src/kernel/include/linux/* include/linux/
-            echo "Applying NoMount kernel patch..."
-            patch -p1 < ../nomount_src/kernel/patches/nomount_4.19_kernel_integration.patch
+            echo "Applying NoMount..."
+            curl -LSs https://raw.githubusercontent.com/maxsteeel/nomount/refs/heads/dev/kernel/setup.sh | bash -s dev
             echo "CONFIG_NOMOUNT=y" >> arch/arm64/configs/blossom_defconfig
           fi
-          
+
           if [[ "$ROOT_OPT" == "none" ]]; then
             echo "No root method selected. Building clean kernel."
           fi
